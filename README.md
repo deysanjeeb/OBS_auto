@@ -34,3 +34,6 @@ This project is a web application for automating OBS (Open Broadcaster Software)
 
 Contributions are welcome. Please open an issue to discuss your idea or submit a pull request.
 
+## License
+
+This project is licensed under the terms of the MIT license.
