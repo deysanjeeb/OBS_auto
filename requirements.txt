@@ -1,0 +1,3 @@
+Flask==3.0.1
+pandas==2.2.0
+obs-websocket-py

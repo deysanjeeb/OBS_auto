@@ -35,9 +35,12 @@
     <button class="btn btn-outline-dark btn-lg px-5" type="submit">Enter</button>
 </form>
 <br>
+
 <h3>Current Timeline</h3>
+
 {%for i in flow.index%}
 Switches out of {{flow['scene'][i]}} in {{flow['duration'][i]}} seconds with {{flow['transition'][i]}}<br>
 {%endfor%}
+<a href=/quit><button class="btn btn-danger" >Quit</button></a>
   </body>
   </html>

@@ -2,7 +2,6 @@ import sys
 import time
 from os.path import exists
 from obswebsocket import obsws, events, requests
-import PySimpleGUI as sg
 import json, sys, os, time, csv
 from flask import Flask,request
 from flask import render_template
@@ -11,7 +10,9 @@ import pandas
 import socket, threading
 import asyncio
 from threading import Event
+from flask import request
 
+    
 app = Flask(__name__)
 app.app_context().push()
 thr=0
@@ -23,9 +24,9 @@ async def tasks(commands):
 			await asyncio.sleep(commands['duration'][i]) 
 			ws.call(requests.SetCurrentTransition(commands['transition'][i]))
 			ws.call(requests.SetCurrentScene(commands['scene'][i]))
-		global event
-		if event.is_set():
-			break
+		# global event
+		# if event.is_set():
+		# 	break
 
 	
 
@@ -42,10 +43,18 @@ def home():
 		for t in sitions.getTransitions():
 			name = t['name']
 			transitions.append(name)
-
-		return render_template("dashboard.html",scenes=scenes, transitions=transitions)
+		df = pandas.read_csv('saved.csv')
+		print(df)
+		return render_template("dashboard.html",scenes=scenes, transitions=transitions,flow=df)
 	else:
 		return render_template("setup.html")
+
+@app.route("/quit", methods=["GET"])
+def escape():
+	func = request.environ.get('werkzeug.server.shutdown')
+	if func is None:
+		raise RuntimeError('Not running with the Werkzeug Server')
+	func()
 		
 	
 
@@ -71,10 +80,12 @@ def dashboard():
 	if request.method=="GET":
 		scns = ws.call(requests.GetSceneList())
 		transitions = ws.call(requests.GetTransitionList())
+		df = pandas.read_csv('saved.csv')
+		print(df)
 		for s in scns.getScenes():
 			name = s['name']
 			scenes.append(name)
-		return render_template("dashboard.html",scenes=scenes, transitions=transitions)
+		return render_template("dashboard.html",scenes=scenes, transitions=transitions, flow=df)
 	if request.method=="POST":
 		
 		items=request.form.items(multi=True)
@@ -97,6 +108,7 @@ def dashboard():
 					row=[]
 					i=i+1
 		df = pandas.read_csv('saved.csv')
+		print(df)
 		global thr
 		global _thread
 		global event
@@ -153,6 +165,7 @@ if __name__ == '__main__':
 		connected=True
 		ws = obsws(host, port, secret)
 		ws.connect()
+		print("connected")
 	else:
 		connected=False
 	app.run(host='0.0.0.0',port=8080, debug=True)
